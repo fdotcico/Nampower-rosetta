@@ -1,105 +1,106 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.16)
 
-foreach(policy
-        CMP0074 # CMake 3.12
-)
-    if(POLICY ${policy})
-        cmake_policy(SET ${policy} NEW)
-    endif()
-endforeach()
+project(nampower_rosetta LANGUAGES C CXX)
 
+# C++14 come l'originale
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_DISABLE_SOURCE_CHANGES ON)
 set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
 
-set(PROJECT_NAME nampower)
+# Per default NON costruiamo il loader (richiede MSVC + Boost)
+option(BUILD_LOADER "Build the GUI/loader (requires MSVC + Boost)" OFF)
 
-project(${PROJECT_NAME})
+# Percorso hadesmem (submodule)
+set(HADESMEM_ROOT "${CMAKE_SOURCE_DIR}/external/hadesmem" CACHE PATH "Path to hadesmem root")
 
-# build in Release-mode by default if not explicitly set
-if( NOT CMAKE_BUILD_TYPE )
-    set(CMAKE_BUILD_TYPE "RelWithDebInfo")
-endif()
-set(BOOST_ROOT "C:/software/boost_1_80_0/boost")
-set(BOOST_INCLUDEDIR "C:/software/boost_1_80_0")
-set(BOOST_LIBRARYDIR "C:/software/boost_1_80_0/lib32-msvc-14.3")
-set (Boost_DETAILED_FAILURE_MSG ON)
-set (Boost_DEBUG ON)
-
-set(Boost_USE_STATIC_LIBS ON)
-set(Boost_USE_MULTITHREADED ON)
-set(Boost_USE_STATIC_RUNTIME OFF)
-
-find_package(Boost REQUIRED COMPONENTS filesystem program_options)
-
-if (Boost_FOUND)
-    message(STATUS "boost found at ${Boost_INCLUDE_DIR}.  Library dir: ${Boost_LIBRARY_DIR_DEBUG}")
-else()
-    message(FATAL_ERROR "boost not found")
+# Verifica hadesmem
+if(NOT EXISTS "${HADESMEM_ROOT}/include/memory/hadesmem")
+  message(FATAL_ERROR "hadesmem non trovato in: ${HADESMEM_ROOT}/include/memory/hadesmem
+Hai inizializzato i submodule? Esegui:  git submodule update --init --recursive")
 endif()
 
-if ("x_${CMAKE_BUILD_TYPE}" STREQUAL "x_Debug")
-    set(HADESMEM_ROOT "C:/software/hadesmem-v142-Debug-Win32")
-    set(HADESMEM_BUILD "Debug")
-    link_directories("${Boost_LIBRARY_DIR_DEBUG}")
-else()
-    set(HADESMEM_ROOT "C:/software/hadesmem-v142-Release-Win32")
-    set(HADESMEM_BUILD "Release")
-    link_directories("${Boost_LIBRARY_DIR_RELEASE}")
-endif()
-
-if (CMAKE_SIZEOF_VOID_P EQUAL 8)
-    message(FATAL_ERROR "64-bit unsupported.  nampower integrates with the 1.12.1 client which is only 32 bit")
-else()
-    set(HADESMEM_ARCH "Win32")
-endif()
-
-if ("x_${HADESMEM_ROOT}" STREQUAL "x_")
-    if (EXISTS "${CMAKE_SOURCE_DIR}/hadesmem-v${MSVC_TOOLSET_VERSION}-${HADESMEM_BUILD}-${HADESMEM_ARCH}")
-        set(HADESMEM_ROOT "${CMAKE_SOURCE_DIR}/hadesmem-v${MSVC_TOOLSET_VERSION}-${HADESMEM_BUILD}-${HADESMEM_ARCH}")
-        set(HADESMEM_LIB_DIR "${HADESMEM_ROOT}/lib")
-    else()
-        message(FATAL_ERROR "HADESMEM_ROOT not set.  ${PROJECT_NAME} requires hadesmem, available at https://github.com/namreeb/hadesmem")
-    endif()
-else()
-    set(HADESMEM_LIB_DIR "${HADESMEM_ROOT}/lib")
-endif()
-
-if (NOT EXISTS "${HADESMEM_ROOT}/include/memory/hadesmem")
-    message(FATAL_ERROR "hadesmem not found at ${HADESMEM_ROOT}")
-else()
-    message(STATUS "hadesmem found at ${HADESMEM_ROOT}")
-endif()
-
-message(STATUS "hadesmem library directory: ${HADESMEM_LIB_DIR}")
-
-# threading library is required
-find_package(Threads REQUIRED)
-
-add_definitions(-DUNICODE -D_UNICODE -D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS -DASMJIT_STATIC -DASMJIT_BUILD_X86 -DHADESMEM_NO_PUGIXML)
-include_directories(
-        "Include"
-        "${CMAKE_CURRENT_SOURCE_DIR}"
-        "${Boost_INCLUDE_DIR}"
-        "${HADESMEM_ROOT}/include/memory/"
-        "${HADESMEM_ROOT}/deps/udis86/udis86"
-        "${HADESMEM_ROOT}/deps/asmjit/asmjit/src"
+# Boost: ci servono solo gli header (Boost.Exception)
+find_path(BOOST_INCLUDE_DIR
+  NAMES boost/exception/all.hpp
+  HINTS $ENV{BOOST_ROOT} /opt/homebrew /usr/local /usr
+  PATH_SUFFIXES include
 )
+if(NOT BOOST_INCLUDE_DIR)
+  message(FATAL_ERROR "Boost headers non trovati. Installa con: brew install boost")
+endif()
+message(STATUS "Boost headers: ${BOOST_INCLUDE_DIR}")
 
-link_directories("${HADESMEM_LIB_DIR}")
+# ------------ udis86 (deps di hadesmem) ------------
+set(UDIS86_TOP    "${HADESMEM_ROOT}/deps/udis86/udis86")
+set(UDIS86_LIBDIR "${UDIS86_TOP}/libudis86")
 
-# Set static runtime library
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
+if(NOT EXISTS "${UDIS86_TOP}/udis86.h" OR NOT EXISTS "${UDIS86_LIBDIR}")
+  message(FATAL_ERROR "Struttura udis86 non trovata sotto hadesmem. Hai fatto --recursive?")
+endif()
 
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:MSVCRT /NODEFAULTLIB:MSVCRTD")
+file(GLOB UDIS86_SRC "${UDIS86_LIBDIR}/*.c")
+add_library(udis86 STATIC ${UDIS86_SRC})
+target_include_directories(udis86 PUBLIC
+  "${UDIS86_TOP}"     # per udis86.h
+  "${UDIS86_LIBDIR}"  # per libudis86/*.h (es. itab.h, types.h)
+)
+set_property(TARGET udis86 PROPERTY C_STANDARD 99)
 
-# Link static libraries
-add_subdirectory(loader)
+# ------------ DLL di Nampower ------------
 add_subdirectory(nampower)
 
-install(FILES
-        "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.txt"
-        "${CMAKE_CURRENT_SOURCE_DIR}/README.md"
-        DESTINATION "${CMAKE_INSTALL_PREFIX}")
+if(TARGET nampower)
+  target_include_directories(nampower PRIVATE
+    "${CMAKE_CURRENT_SOURCE_DIR}/nampower/Include"
+    "${CMAKE_CURRENT_SOURCE_DIR}/nampower"
+    "${HADESMEM_ROOT}/include/memory"
+    "${HADESMEM_ROOT}/deps/asmjit/asmjit/src"
+    "${BOOST_INCLUDE_DIR}"
+    "${UDIS86_TOP}"      # include per udis86.h
+    "${UDIS86_LIBDIR}"   # include per itab.h & co.
+  )
+
+  target_compile_definitions(nampower PRIVATE
+    UNICODE _UNICODE _SCL_SECURE_NO_WARNINGS _CRT_SECURE_NO_WARNINGS
+    ASMJIT_STATIC ASMJIT_BUILD_X86 HADESMEM_NO_PUGIXML
+  )
+
+  # MinGW: rilassiamo alcuni errori e linkiamo statici libgcc/libstdc++ e winpthread
+if(MINGW)
+  # forza pthread statico
+  execute_process(
+    COMMAND ${CMAKE_CXX_COMPILER} -print-file-name=libwinpthread.a
+    OUTPUT_VARIABLE WINPTHREAD_STATIC
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+  if (WINPTHREAD_STATIC AND EXISTS "${WINPTHREAD_STATIC}")
+    message(STATUS "Linking static winpthread: ${WINPTHREAD_STATIC}")
+    target_link_libraries(nampower PRIVATE "${WINPTHREAD_STATIC}")
+  else()
+    message(WARNING "libwinpthread.a non trovata, uso DLL winpthread")
+    target_link_libraries(nampower PRIVATE winpthread)
+  endif()
+
+  target_link_options(nampower PRIVATE -static-libgcc -static-libstdc++)
+  target_compile_options(nampower PRIVATE -fpermissive)
+endif()
+
+  # Link al nostro udis86 e alle Win32 libs (niente -lasmjit/-ludis86 esterni)
+  target_link_libraries(nampower PRIVATE
+    udis86
+    shlwapi
+    kernel32 user32 gdi32 winspool shell32 ole32 oleaut32 uuid comdlg32 advapi32
+  )
+
+  # Uscita come "nampower.dll" (senza prefisso lib)
+  set_target_properties(nampower PROPERTIES PREFIX "" OUTPUT_NAME "nampower")
+endif()
+
+# Loader opzionale (solo con MSVC)
+if(BUILD_LOADER AND MSVC)
+  add_subdirectory(loader)
+endif()
+
+# Install di file testo (opzionale)
+install(FILES LICENSE.txt README.md DESTINATION "${CMAKE_INSTALL_PREFIX}")

@@ -5,6 +5,7 @@
 #include "helper.hpp"
 #include "offsets.hpp"
 #include "main.hpp"
+#include <cmath>
 
 namespace Nampower {
     bool SpellIsOnGcd(const game::SpellRec *spell) {
@@ -116,7 +117,7 @@ namespace Nampower {
 
     float GetNameplateDistance() {
         auto const distanceSquared = *reinterpret_cast<float *>(Offsets::NameplateDistance);
-        return sqrtf(distanceSquared);
+        return static_cast<float>(std::sqrt(distanceSquared));
     }
 
     void SetNameplateDistance(float distance) {

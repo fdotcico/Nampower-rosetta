@@ -36,6 +36,8 @@
 #include "scripts.hpp"
 #include "spellchannel.hpp"
 #include "helper.hpp"
+#include <algorithm>
+#include <mutex>
 
 #include <cstdint>
 #include <memory>
@@ -260,7 +262,7 @@ namespace Nampower {
             }
         }
 
-        return max(gCastData.castEndMs, gCastData.delayEndMs);
+        return (std::max)(gCastData.castEndMs, gCastData.delayEndMs);
     }
 
     void ResetChannelingFlags() {
