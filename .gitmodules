@@ -1,3 +1,0 @@
-[submodule "external/hadesmem"]
-	path = external/hadesmem
-	url = git@github.com:fdotcico/hadesmem-rosetta.git
