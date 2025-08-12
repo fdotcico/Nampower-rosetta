@@ -36,7 +36,7 @@ external/hadesmem/deps/udis86/udis86/libudis86/
 ```
 
 ### Installation
-- Grab the latest nampower.dll from https://github.com/fdotcico/nampower-rosetta/releases and place in the same directory as WoW.exe.
+- Compile or grab the latest nampower.dll from https://github.com/fdotcico/nampower-rosetta/releases and place in the same directory as WoW.exe.
 - Add nampower.dll in dlls.txt
 - You can also get the helper addon and place that in Interface/Addons.
 
