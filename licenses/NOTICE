@@ -1,0 +1,4 @@
+This distribution includes work derived from:
+- "nampower" by Namreeb (see upstream repository for license)
+- "nampower" fork by Pepo (see upstream repository for license)
+Third-party vendored components include hadesmem, udis86, and asmjit; see individual LICENSE files.
