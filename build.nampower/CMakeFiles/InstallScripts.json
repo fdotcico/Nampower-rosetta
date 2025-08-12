@@ -1,0 +1,8 @@
+{
+	"InstallScripts" : 
+	[
+		"/Users/fcicognini/Nampower-rosetta_bak/build.nampower/cmake_install.cmake",
+		"/Users/fcicognini/Nampower-rosetta_bak/build.nampower/nampower/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

@@ -1,0 +1,19 @@
+# ninja log v7
+1	73	1754962823271889870	CMakeFiles/udis86.dir/external/hadesmem/deps/udis86/udis86/libudis86/syn-att.c.obj	5eab1122bb9b3534
+2	73	1754962823272256956	CMakeFiles/udis86.dir/external/hadesmem/deps/udis86/udis86/libudis86/syn.c.obj	89edda7fd036cd80
+1	74	1754962823271689035	CMakeFiles/udis86.dir/external/hadesmem/deps/udis86/udis86/libudis86/itab.c.obj	93221869cc8411b9
+2	81	1754962823272078371	CMakeFiles/udis86.dir/external/hadesmem/deps/udis86/udis86/libudis86/syn-intel.c.obj	b69ae6be0943ff46
+2	86	1754962823272417124	CMakeFiles/udis86.dir/external/hadesmem/deps/udis86/udis86/libudis86/udis86.c.obj	fd70e797ba75d7e8
+2	206	1754962823272593625	nampower/CMakeFiles/nampower.dir/logging.cpp.obj	59e89e67e864f6b2
+2	271	1754962823272774459	nampower/CMakeFiles/nampower.dir/cdatastore.cpp.obj	548269f189ed2968
+1	324	1754962823271299783	CMakeFiles/udis86.dir/external/hadesmem/deps/udis86/udis86/libudis86/decode.c.obj	62dc34a5951463da
+324	362	1754962823594999401	libudis86.a	34d54b5139fad3e0
+2	365	1754962823272970627	nampower/CMakeFiles/nampower.dir/game.cpp.obj	7ee16b2cbec59011
+3	1300	1754962823273391672	nampower/CMakeFiles/nampower.dir/helper.cpp.obj	f4bd1aafab1e5d0
+4	1342	1754962823274097176	nampower/CMakeFiles/nampower.dir/spellchannel.cpp.obj	5d7f5a193a8f38c8
+4	1409	1754962823274616096	nampower/CMakeFiles/nampower.dir/scripts.cpp.obj	407c42ff30a26f6a
+4	1606	1754962823274390012	nampower/CMakeFiles/nampower.dir/spellevents.cpp.obj	d3230412ceee282b
+3	1620	1754962823273623131	nampower/CMakeFiles/nampower.dir/spellcast.cpp.obj	b7eb4947982d9130
+3	4302	1754962823273173337	nampower/CMakeFiles/nampower.dir/main.cpp.obj	eb3f155a972dae9f
+4303	4526	1754962827792826330	nampower/nampower.dll	2957d4bf118bc1aa
+4303	4526	1754962827792826330	nampower/libnampower.dll.a	2957d4bf118bc1aa

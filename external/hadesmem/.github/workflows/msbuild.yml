@@ -1,0 +1,54 @@
+name: MSBuild
+
+on:
+  push:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        toolset: [v143]
+        configuration: [Debug, Release]
+        platform: [Win32, x64]
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: recursive
+
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Fix udis86
+      run: New-Item -ItemType SymbolicLink -Path "c:\python27" -Target $Env:pythonLocation
+
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v1.1
+
+    - name: Build
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: msbuild build\vs\hadesmem.sln -target:hadesmem /p:Configuration=${{ matrix.configuration }} /p:Platform=${{ matrix.platform }} /p:PlatformToolset=${{ matrix.toolset }}
+
+    - name: Setup Artifact
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: |
+        $artifact = "hadesmem-${{ matrix.toolset }}-${{ matrix.configuration }}-${{ matrix.platform }}"
+        mkdir $artifact
+        mkdir $artifact\lib
+        copy build\vs\${{ matrix.configuration }}\${{ matrix.platform }}\*.lib $artifact\lib
+        xcopy /s /i include $artifact\include
+        xcopy /s /i deps\asmjit\asmjit\src\asmjit\*.h $artifact\deps\asmjit\asmjit\src\asmjit
+        xcopy /s /i deps\udis86\udis86\*.h $artifact\deps\udis86\udis86
+        xcopy /s /i deps\pugixml\pugixml\src\*.?pp $artifact\deps\pugixml\pugixml\src
+        Compress-Archive $artifact hadesmem-${{ matrix.toolset }}-${{ matrix.configuration }}-${{ matrix.platform }}.zip
+
+    - uses: softprops/action-gh-release@v1
+      name: Upload assets to release
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        draft: true
+        files: hadesmem-${{ matrix.toolset }}-${{ matrix.configuration }}-${{ matrix.platform }}.zip
+        fail_on_unmatched_files: true

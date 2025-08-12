@@ -1,0 +1,14 @@
+/Users/fcicognini/Nampower-rosetta_bak/build.nampower/CMakeFiles/udis86.dir
+/Users/fcicognini/Nampower-rosetta_bak/build.nampower/CMakeFiles/edit_cache.dir
+/Users/fcicognini/Nampower-rosetta_bak/build.nampower/CMakeFiles/rebuild_cache.dir
+/Users/fcicognini/Nampower-rosetta_bak/build.nampower/CMakeFiles/list_install_components.dir
+/Users/fcicognini/Nampower-rosetta_bak/build.nampower/CMakeFiles/install.dir
+/Users/fcicognini/Nampower-rosetta_bak/build.nampower/CMakeFiles/install/local.dir
+/Users/fcicognini/Nampower-rosetta_bak/build.nampower/CMakeFiles/install/strip.dir
+/Users/fcicognini/Nampower-rosetta_bak/build.nampower/nampower/CMakeFiles/nampower.dir
+/Users/fcicognini/Nampower-rosetta_bak/build.nampower/nampower/CMakeFiles/edit_cache.dir
+/Users/fcicognini/Nampower-rosetta_bak/build.nampower/nampower/CMakeFiles/rebuild_cache.dir
+/Users/fcicognini/Nampower-rosetta_bak/build.nampower/nampower/CMakeFiles/list_install_components.dir
+/Users/fcicognini/Nampower-rosetta_bak/build.nampower/nampower/CMakeFiles/install.dir
+/Users/fcicognini/Nampower-rosetta_bak/build.nampower/nampower/CMakeFiles/install/local.dir
+/Users/fcicognini/Nampower-rosetta_bak/build.nampower/nampower/CMakeFiles/install/strip.dir

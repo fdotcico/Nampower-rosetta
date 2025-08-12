@@ -1,0 +1,3 @@
+[submodule "external/hadesmem"]
+	path = external/hadesmem
+	url = https://github.com/namreeb/hadesmem
